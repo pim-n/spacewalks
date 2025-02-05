@@ -13,8 +13,11 @@ eva_df.sort_values('date', inplace=True)
 
 eva_df.to_csv(output_file, index=False)
 
+# convert the time string of H:M to a float representing the hours
 eva_df['duration_hours'] = eva_df['duration'].str.split(":").apply(lambda x: int(x[0]) + int(x[1])/60)
+# cumulative sum of those float hours
 eva_df['cumulative_time'] = eva_df['duration_hours'].cumsum()
+
 plt.plot(eva_df['date'], eva_df['cumulative_time'], 'ko-')
 plt.xlabel('Year')
 plt.ylabel('Total time spent in space to date (hours)')
