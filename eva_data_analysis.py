@@ -1,24 +1,26 @@
+import csv
+import datetime as dt
+import json
+
+import matplotlib.pyplot as plt
+
 # https://data.nasa.gov/resource/eva.json (with modifications)
-data_f = open('./eva-data.json', 'r')
-data_t = open('./eva-data.csv','w')
-g_file = './cululative_ev_graph.png'
+input_file = open('./eva-data.json', 'r')
+output_file = open('./eva-data.csv','w')
+graph_file = './cululative_ev_graph.png'
 
 fieldnames = ("EVA #", "Country", "Crew    ", "Vehicle", "Date", "Duration", "Purpose")
 
 data=[]
-import json
 
 for i in range(374):
-    line=data_f.readline()
+    line=input_file.readline()
     print(line)
     data.append(json.loads(line[1:-1]))
 #data.pop(0)
 ## Comment out this bit if you don't want the spreadsheet
-import csv
 
-w=csv.writer(data_t)
-
-import datetime as dt
+w=csv.writer(output_file)
 
 time = []
 date =[]
@@ -29,14 +31,14 @@ for i in data:
     # and this bit
     w.writerow(data[j].values())
     if 'duration' in data[j].keys():
-        tt=data[j]['duration']
-        if tt == '':
+        eva_duration_str = data[j]['duration']
+        if eva_duration_str == '':
             pass
         else:
-            t=dt.datetime.strptime(tt,'%H:%M')
-            ttt = dt.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second).total_seconds()/(60*60)
-            print(t,ttt)
-            time.append(ttt)
+            eva_duration = dt.datetime.strptime(eva_duration_str,'%H:%M')
+            eva_total_hours = dt.timedelta(hours=eva_duration.hour, minutes=eva_duration.minute, seconds=eva_duration.second).total_seconds()/(60*60)
+            print(eva_duration, eva_total_hours)
+            time.append(eva_total_hours)
             if 'date' in data[j].keys():
                 date.append(dt.datetime.strptime(data[j]['date'][0:10], '%Y-%m-%d'))
                 #date.append(data[j]['date'][0:10])
@@ -51,11 +53,9 @@ for i in time:
 
 date,time = zip(*sorted(zip(date, time)))
 
-import matplotlib.pyplot as plt
-
 plt.plot(date,t[1:], 'ko-')
 plt.xlabel('Year')
 plt.ylabel('Total time spent in space to date (hours)')
 plt.tight_layout()
-plt.savefig(g_file)
+plt.savefig(graph_file)
 plt.show()
